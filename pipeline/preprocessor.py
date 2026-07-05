@@ -38,10 +38,13 @@ class Preprocessor:
         return df
     
     def remove_stopwords(self, df):
-        STOPWORDS = set(stopwords.words('english'))
+        stop_words = set(stopwords.words('english'))
+
+        excecoes = {'i', 'me', 'you'}
+        stop_words = stop_words - excecoes
 
         def remove_stopwords_single(text):
-            return ' '.join([word for word in str(text).split() if word not in STOPWORDS])
+            return ' '.join([word for word in str(text).split() if word not in stop_words])
         
         df[self.texts_column] = df[self.texts_column].apply(remove_stopwords_single)
         return df
