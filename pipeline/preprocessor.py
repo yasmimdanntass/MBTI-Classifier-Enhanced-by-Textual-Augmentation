@@ -69,8 +69,9 @@ class Preprocessor:
     
     def remove_urls(self, df):
         def remove_urls_single(text):
-            url_pattern = re.compile(r'https?://\S+|www\.\S+')
-            return url_pattern.sub(r'', text)
+            # Alterado de \S+ para [^\s|]+ para evitar que engula o delimitador ||| do dataset.
+            url_pattern = re.compile(r'https?://[^\s|]+|www\.[^\s|]+')
+            return url_pattern.sub(r'', str(text))
         df[self.texts_column] = df[self.texts_column].apply(remove_urls_single)   
         return df
     
@@ -81,15 +82,17 @@ class Preprocessor:
                 replacement = "_".join(
                     EMOTICONS_EMO[emot].replace(",", "").split()
                 )
-                text = re.sub(pattern, replacement, text)
+                text = re.sub(pattern, replacement, str(text))
             return text
         df[self.texts_column] = df[self.texts_column].apply(convert_emoticons_single)   
         return df
     
     def remove_html(self, df):
         def remove_html_single(text):
-            html_pattern = re.compile('<.*?>')
-            return html_pattern.sub(r'', text)
+            # Alterado para casar apenas com tags HTML prováveis (começando com letra ou /)
+            # Evita deletar coisas como "<3" ou equações "< 5"
+            html_pattern = re.compile(r'<[a-zA-Z\/][^>]*>')
+            return html_pattern.sub(r'', str(text))
         
         df[self.texts_column] = df[self.texts_column].apply(remove_html_single)   
         return df
