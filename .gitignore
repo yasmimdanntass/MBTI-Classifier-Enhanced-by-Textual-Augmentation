@@ -1,0 +1,3 @@
+*.csv
+*.parquet
+data/augmented_datasets/mbti_augmented.csv
