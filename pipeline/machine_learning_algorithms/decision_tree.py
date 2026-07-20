@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
-class decision_tree:
+class DecisionTree:
     def __init__(self, random_state=42, **dt_kwargs):
         """
         Initializes 4 independent Decision Trees Classifiers.
