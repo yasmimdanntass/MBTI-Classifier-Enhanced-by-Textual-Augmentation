@@ -1,4 +1,4 @@
-from pipeline.tfidf import TFIDFTokenizer
+from pipeline.encoders.tfidf import TFIDFTokenizer
 
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
