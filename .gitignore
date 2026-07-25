@@ -1,5 +1,5 @@
 *.csv
 *.parquet
+data/**/*.pkl
 data/augmented_datasets/mbti_augmented.csv
-data/dataset_with_encodings/final_dataset_with_encodings.pkl*.pkl
 full_dataset_with_embeddings_augmented_qwen.csv
