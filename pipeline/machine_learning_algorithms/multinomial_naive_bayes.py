@@ -1,7 +1,6 @@
-from pipeline.encoders.tfidf import TFIDFTokenizer
+import pandas as pd
 
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -10,87 +9,85 @@ from sklearn.metrics import (
     classification_report
 )
 
-
 class MultinomialNaiveBayesClassifier:
 
     def __init__(self):
-        self.tokenizer = TFIDFTokenizer()
-        self.model = MultinomialNB()
+        self.dimensions = ['I_E', 'N_S', 'T_F', 'J_P']
 
-    def prepare_data(self, dataframe, target_column):
+        self.models = {
+            dim: MultinomialNB()
+            for dim in self.dimensions
+        }
 
-        columns = ["posts", target_column]
+    def fit(self, X_train, y_train_df):
 
-        for column in columns:
-            if column not in dataframe.columns:
-                raise ValueError(
-                    f"A coluna '{column}' não existe no DataFrame."
-                )
+        for dim in self.dimensions:
+            self.models[dim].fit(X_train, y_train_df[dim])
 
-        cleaned_dataframe = dataframe.dropna(subset = columns).copy()
+        return self
 
-        cleaned_dataframe = cleaned_dataframe[cleaned_dataframe["posts"].str.strip() != ""]
+    def predict(self, x_test):
 
-        x = cleaned_dataframe["posts"]
-        y = cleaned_dataframe[target_column]
+        predictions = {}
 
-        return x, y
+        for dim in self.dimensions:
+            predictions[dim] = self.models[dim].predict(x_test)
 
-    def train(self, dataframe, target_column):
-        x, y = self.prepare_data(dataframe, target_column)
-
-        x_train, x_test, y_train, y_test = train_test_split(
-            x,
-            y,
-            test_size = 0.2,
-            random_state = 42,
-            stratify = y
-        )
-
-        x_train_tfidf = self.tokenizer.fit_transform(x_train)
-
-        self.model.fit(x_train_tfidf, y_train)
-
-        return x_test, y_test
-
-    def predict(self, texts):
-        x_tfidf = self.tokenizer.transform(texts)
-
-        return self.model.predict(x_tfidf)
+        return pd.DataFrame(predictions)
 
     def evaluate(self, x_test, y_test):
+
+        results = {}
+
         predictions = self.predict(x_test)
 
-        accuracy = accuracy_score(
-            y_test,
-            predictions
-        )
+        for dim in self.dimensions:
+            y_pred = predictions[dim]
 
-        precision = precision_score(
-            y_test,
-            predictions,
-            average = "macro",
-            zero_division = 0
-        )
+            accuracy = accuracy_score(
+                y_test[dim], 
+                y_pred
+            )   
 
-        recall = recall_score(
-            y_test,
-            predictions,
-            average = "macro",
-            zero_division = 0
-        )
+            precision = precision_score(
+                y_test[dim], 
+                y_pred,
+                average = "macro",
+                zero_division = 0
+            )
 
-        f1 = f1_score(
-            y_test,
-            predictions,
-            average = "macro",
-            zero_division = 0
-        )
+            recall = recall_score(
+                y_test[dim], 
+                y_pred,
+                average = "macro",
+                zero_division = 0
+            )
 
-        report = classification_report(
-            y_test,
-            predictions,
-            zero_division = 0
-        )
+            f1 = f1_score(
+                y_test[dim], 
+                y_pred,
+                average = "macro",
+                zero_division = 0
+            )
 
-        return accuracy, precision, recall, f1, report
+            report = classification_report(
+                y_test[dim], 
+                y_pred,
+                zero_division = 0
+            )
+
+            print(f"\n{'=' * 50}")
+            print(f"Evaluation for dimension: {dim}")
+            print(f"{'=' * 50}")
+            print(f"Accuracy: {accuracy:.4f}\n")
+            print(report)
+
+            results[dim] = {
+                "accuracy": accuracy,
+                "precision": precision,
+                "recall": recall,
+                "f1": f1,
+                "classification_report": report
+            }
+
+        return results
