@@ -40,11 +40,13 @@ class LogisticRegressionClassifier:
         return pd.DataFrame(predictions)
 
     def evaluate(self, X_test, y_test_df):
+        predictions = self.predict(X_test)
         for col in y_test_df.columns:
-            preds = self.models[col].predict(X_test)
+            preds = predictions[col]
             acc = accuracy_score(y_test_df[col], preds)
             print("\n" + "=" * 50)
             print(f"Evaluation for dimension: {col}")
             print("=" * 50)
             print(f"Accuracy: {acc:.4f}\n")
             print(classification_report(y_test_df[col], preds))
+        return predictions
