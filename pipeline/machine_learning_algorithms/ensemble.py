@@ -6,10 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 
 class PreFittedVotingClassifier:
-    """
-    A custom voting classifier that accepts PRE-FITTED models and doesn't retrain them.
-    This saves hours of training time.
-    """
+   
     def __init__(self, estimators, voting='soft'):
         self.estimators = estimators
         self.voting = voting
